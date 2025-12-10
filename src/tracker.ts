@@ -2,7 +2,10 @@ import '@whiskeysockets/baileys';
 import { WASocket, proto } from '@whiskeysockets/baileys';
 import { pino } from 'pino';
 
-const logger = pino({ level: 'debug' });
+// Suppress Baileys debug output (Closing session spam)
+const logger = pino({
+    level: process.argv.includes('--debug') ? 'debug' : 'silent'
+});
 
 /**
  * Logger utility for debug and normal mode
@@ -30,17 +33,28 @@ class TrackerLogger {
 
     formatDeviceState(jid: string, rtt: number, avgRtt: number, median: number, threshold: number, state: string) {
         const stateColor = state === 'Online' ? '🟢' : state === 'Standby' ? '🟡' : state === 'OFFLINE' ? '🔴' : '⚪';
-        const timestamp = new Date().toLocaleTimeString('en-US');
+        const timestamp = new Date().toLocaleTimeString('de-DE');
+
+        // Box width is 64 characters, inner content is 62 characters (excluding ║ on both sides)
+        const boxWidth = 62;
+
+        const header = `${stateColor} Device Status Update - ${timestamp}`;
+        const jidLine = `JID:        ${jid}`;
+        const statusLine = `Status:     ${state}`;
+        const rttLine = `RTT:        ${rtt}ms`;
+        const avgLine = `Avg (3):    ${avgRtt.toFixed(0)}ms`;
+        const medianLine = `Median:     ${median.toFixed(0)}ms`;
+        const thresholdLine = `Threshold:  ${threshold.toFixed(0)}ms`;
 
         console.log(`\n╔════════════════════════════════════════════════════════════════╗`);
-        console.log(`║ ${stateColor} Device Status Update - ${timestamp}                 ║`);
+        console.log(`║ ${header.padEnd(boxWidth)} ║`);
         console.log(`╠════════════════════════════════════════════════════════════════╣`);
-        console.log(`║ JID:        ${jid.padEnd(48)} ║`);
-        console.log(`║ Status:     ${state.padEnd(48)} ║`);
-        console.log(`║ RTT:        ${rtt}ms${' '.repeat(48 - (rtt.toString().length + 2))}║`);
-        console.log(`║ Avg (3):    ${avgRtt.toFixed(0)}ms${' '.repeat(48 - (avgRtt.toFixed(0).length + 2))}║`);
-        console.log(`║ Median:     ${median.toFixed(0)}ms${' '.repeat(48 - (median.toFixed(0).length + 2))}║`);
-        console.log(`║ Threshold:  ${threshold.toFixed(0)}ms${' '.repeat(48 - (threshold.toFixed(0).length + 2))}║`);
+        console.log(`║ ${jidLine.padEnd(boxWidth)} ║`);
+        console.log(`║ ${statusLine.padEnd(boxWidth)} ║`);
+        console.log(`║ ${rttLine.padEnd(boxWidth)} ║`);
+        console.log(`║ ${avgLine.padEnd(boxWidth)} ║`);
+        console.log(`║ ${medianLine.padEnd(boxWidth)} ║`);
+        console.log(`║ ${thresholdLine.padEnd(boxWidth)} ║`);
         console.log(`╚════════════════════════════════════════════════════════════════╝\n`);
     }
 }

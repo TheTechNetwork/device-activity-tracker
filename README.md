@@ -64,9 +64,32 @@ npm start
 
 Follow prompts to authenticate and enter target number.
 
+**Example Output:**
+
+```
+╔════════════════════════════════════════════════════════════════╗
+║ 🟡 Device Status Update - 09:41:51                             ║
+╠════════════════════════════════════════════════════════════════╣
+║ JID:        ***********@lid                                    ║
+║ Status:     Standby                                            ║
+║ RTT:        1104ms                                             ║
+║ Avg (3):    1161ms                                             ║
+║ Median:     1195ms                                             ║
+║ Threshold:  1075ms                                             ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+- **🟢 Online**: Device is actively being used (RTT below threshold)
+- **🟡 Standby**: Device is idle/locked (RTT above threshold)
+- **🔴 Offline**: Device is offline or unreachable (no CLIENT ACK received)
+
 ## How It Works
 
 The tracker sends reaction messages to non-existent message IDs, which triggers no notifications at the target. The time between sending the probe message and receiving the CLIENT ACK (Status 3) is measured as RTT. Device state is detected using a dynamic threshold calculated as 90% of the median RTT: values below the threshold indicate active usage, values above indicate standby mode. Measurements are stored in a history and the median is continuously updated to adapt to different network conditions.
+
+## Common Issues
+
+- **Not Connecting to WhatsApp**: Delete the `auth_info_baileys/` folder and re-scan the QR code.
 
 ## Project Structure
 

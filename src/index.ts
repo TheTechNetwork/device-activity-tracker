@@ -7,6 +7,56 @@
  * For educational and research purposes only.
  */
 
+const debugMode = process.argv.includes('--debug') || process.argv.includes('-d');
+const originalConsoleLog = console.log;
+const originalStdoutWrite = process.stdout.write.bind(process.stdout);
+
+// prevents Baileys from spamming the console
+const shouldSuppressOutput = (message: string): boolean => {
+    return message.includes('Closing session:') ||
+           message.includes('SessionEntry') ||
+           message.includes('_chains') ||
+           message.includes('registrationId') ||
+           message.includes('currentRatchet') ||
+           message.includes('ephemeralKeyPair') ||
+           message.includes('pendingPreKey') ||
+           message.includes('indexInfo') ||
+           message.includes('baseKey') ||
+           message.includes('remoteIdentityKey') ||
+           message.includes('lastRemoteEphemeralKey') ||
+           message.includes('previousCounter') ||
+           message.includes('rootKey') ||
+           message.includes('signedKeyId') ||
+           message.includes('preKeyId') ||
+           message.includes('<Buffer');
+};
+
+if (!debugMode) {
+    // Override console.log
+    console.log = (...args: any[]) => {
+        const message = String(args[0] || '');
+        if (!shouldSuppressOutput(message)) {
+            originalConsoleLog(...args);
+        }
+    };
+
+    // Override process.stdout.write to catch low-level output
+    process.stdout.write = ((chunk: any, encoding?: any, callback?: any): boolean => {
+        const message = String(chunk);
+        if (shouldSuppressOutput(message)) {
+            // Suppress - but still call callback if provided
+            if (typeof encoding === 'function') {
+                encoding();
+            } else if (typeof callback === 'function') {
+                callback();
+            }
+            return true;
+        }
+        return originalStdoutWrite(chunk, encoding, callback);
+    }) as typeof process.stdout.write;
+}
+
+// Now safe to import modules
 import '@whiskeysockets/baileys';
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { pino } from 'pino';
@@ -15,14 +65,11 @@ import * as qrcode from 'qrcode-terminal';
 import { WhatsAppTracker } from './tracker';
 import * as readline from 'readline';
 
-// Check for debug mode from command line arguments
-const debugMode = process.argv.includes('--debug') || process.argv.includes('-d');
-
 if (debugMode) {
-    console.log('🔍 Debug mode enabled\n');
+    originalConsoleLog('🔍 Debug mode enabled\n');
 } else {
-    console.log('📊 Normal mode (important outputs only)\n');
-    console.log('💡 Tip: Use --debug or -d for detailed debug output\n');
+    originalConsoleLog('📊 Normal mode (important outputs only)\n');
+    originalConsoleLog('💡 Tip: Use --debug or -d for detailed debug output\n');
 }
 
 let currentTargetJid: string | null = null;
@@ -36,6 +83,8 @@ async function connectToWhatsApp() {
         logger: pino({ level: 'silent' }),
         markOnlineOnConnect: true,
     });
+
+    originalConsoleLog('🔌 Connecting to WhatsApp... (use the --debug flag for more details)');
 
     let isConnected = false;
 
@@ -55,23 +104,29 @@ async function connectToWhatsApp() {
             }
 
             const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut;
-            console.log('connection closed due to ', lastDisconnect?.error, ', reconnecting ', shouldReconnect);
+            if (debugMode) {
+                originalConsoleLog('connection closed due to ', lastDisconnect?.error, ', reconnecting ', shouldReconnect);
+            }
             if (shouldReconnect) {
                 connectToWhatsApp();
             }
         } else if (connection === 'open') {
-            console.log('opened connection');
+            originalConsoleLog('✅ Connected to WhatsApp');
             isConnected = true;
 
             if (currentTargetJid) {
-                console.log(`Resuming tracking for ${currentTargetJid}...`);
+                if (debugMode) {
+                    originalConsoleLog(`Resuming tracking for ${currentTargetJid}...`);
+                }
                 currentTracker = new WhatsAppTracker(sock, currentTargetJid, debugMode);
                 currentTracker.startTracking();
             } else {
                 askForTarget();
             }
         } else {
-            console.log('connection update', update);
+            if (debugMode) {
+                originalConsoleLog('connection update', update);
+            }
         }
     });
 
@@ -88,7 +143,7 @@ async function connectToWhatsApp() {
             const cleanNumber = number.replace(/\D/g, '');
 
             if (cleanNumber.length < 10) {
-                console.log('Invalid number format. Please try again.');
+                originalConsoleLog('Invalid number format. Please try again.');
                 rl.close();
                 askForTarget();
                 return;
@@ -96,19 +151,21 @@ async function connectToWhatsApp() {
 
             const targetJid = cleanNumber + '@s.whatsapp.net';
 
-            console.log(`Verifying ${targetJid}...`);
+            if (debugMode) {
+                originalConsoleLog(`Verifying ${targetJid}...`);
+            }
             try {
                 const results = await sock.onWhatsApp(targetJid);
                 const result = results?.[0];
 
                 if (result?.exists) {
-                    console.log(`Target verified: ${result.jid}`);
                     currentTargetJid = result.jid;
                     currentTracker = new WhatsAppTracker(sock, result.jid, debugMode);
                     currentTracker.startTracking();
+                    originalConsoleLog(`✅ Tracking started for ${result.jid}`);
                     rl.close();
                 } else {
-                    console.log('Number not registered on WhatsApp.');
+                    originalConsoleLog('❌ Number not registered on WhatsApp.');
                     rl.close();
                     askForTarget();
                 }
