@@ -1,0 +1,27 @@
+# Railway ignore file
+# These files/folders will not be uploaded to Railway
+
+# Development
+.git
+.vscode
+.idea
+
+# Documentation (not needed in production)
+*.md
+!RAILWAY_DEPLOYMENT.md
+example.png
+
+# Test files
+**/*.test.*
+**/__tests__
+
+# Local environment
+.env.local
+.env.development
+
+# Node modules (will be installed on Railway)
+# node_modules
+
+# Build artifacts (will be built on Railway)
+# dist
+# client/build

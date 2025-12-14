@@ -11,14 +11,22 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { pino } from 'pino';
 import { Boom } from '@hapi/boom';
 import { WhatsAppTracker, ProbeMethod } from './tracker.js';
 import { SignalTracker, getSignalAccounts, checkSignalNumber } from './signal-tracker.js';
 
+// ES Module dirname workaround
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Configuration
 const SIGNAL_API_URL = process.env.SIGNAL_API_URL || 'http://localhost:8080';
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 const app = express();
 app.use(cors());
@@ -226,6 +234,17 @@ async function pollSignalLinkingStatus() {
 checkSignalConnection();
 setInterval(checkSignalConnection, 5000);
 
+// Serve static files from React app in production
+if (NODE_ENV === 'production') {
+    const clientBuildPath = path.join(__dirname, '../client/build');
+    app.use(express.static(clientBuildPath));
+
+    // Handle React routing - return index.html for all non-API routes
+    app.get('*', (req, res) => {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
+    });
+}
+
 io.on('connection', (socket) => {
     console.log('Client connected');
 
@@ -423,7 +442,6 @@ io.on('connection', (socket) => {
     });
 });
 
-const PORT = 3001;
 httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT} in ${NODE_ENV} mode`);
 });
