@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "npm run start:production"
+restartPolicyType = "always"
+restartPolicyMaxRetries = 10
+
+[services]
+# Railway will assign a PORT environment variable
+# The app should listen on this port

@@ -27,10 +27,13 @@
   "homepage": "https://github.com/gommzystudio/device-activity-tracker#readme",
   "scripts": {
     "build": "tsc",
+    "build:client": "cd client && npm run build",
+    "build:all": "npm run build && npm run build:client",
     "start": "npx tsx src/index.ts",
     "start:server": "npm run start:signal-api && npx tsx src/server.ts",
     "start:signal-api": "docker start signal-api 2>/dev/null || docker run -d --name signal-api -p 8080:8080 -v $HOME/.local/share/signal-api:/home/.local/share/signal-cli -e MODE=json-rpc bbernhard/signal-cli-rest-api || true",
     "start:client": "cd client && npm start",
+    "start:production": "NODE_ENV=production node dist/server.js",
     "dev": "npm run start:server",
     "postinstall": "cd client && npm install"
   },

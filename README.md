@@ -30,6 +30,8 @@ The web interface shows real-time RTT measurements, device state detection, and 
 
 ## Installation
 
+### Local Development
+
 ```bash
 # Clone repository
 git clone https://github.com/gommzystudio/device-activity-tracker.git
@@ -41,6 +43,18 @@ cd client && npm install && cd ..
 ```
 
 **Requirements:** Node.js 20+, npm, WhatsApp account
+
+### Production Deployment
+
+**Deploy to Railway (Recommended):**
+See [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for detailed deployment instructions.
+
+Quick deploy:
+1. Fork this repository
+2. Go to [railway.app](https://railway.app)
+3. Create new project from your GitHub repo
+4. Add a volume for `/app/auth_info_baileys`
+5. Deploy! 🚀
 
 ## Usage
 
