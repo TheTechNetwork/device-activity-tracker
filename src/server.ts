@@ -240,8 +240,14 @@ if (NODE_ENV === 'production') {
     app.use(express.static(clientBuildPath));
 
     // Handle React routing - return index.html for all non-API routes
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(clientBuildPath, 'index.html'));
+    // Express 5 compatible: use middleware instead of wildcard route
+    app.use((req, res, next) => {
+        // Only serve index.html for GET requests that aren't files
+        if (req.method === 'GET' && !req.path.includes('.')) {
+            res.sendFile(path.join(clientBuildPath, 'index.html'));
+        } else {
+            next();
+        }
     });
 }
 
