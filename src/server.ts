@@ -442,6 +442,8 @@ io.on('connection', (socket) => {
     });
 });
 
-httpServer.listen(PORT, () => {
-    console.log(`Server running on port ${PORT} in ${NODE_ENV} mode`);
+// Listen on all network interfaces (0.0.0.0) for Railway
+const HOST = '0.0.0.0';
+httpServer.listen(PORT, HOST, () => {
+    console.log(`Server running on ${HOST}:${PORT} in ${NODE_ENV} mode`);
 });
