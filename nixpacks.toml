@@ -1,11 +1,20 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "docker"]
+nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm install", "cd client && npm install"]
+cmds = [
+  "npm install",
+  "cd client && npm install && cd .."
+]
 
 [phases.build]
-cmds = ["cd client && npm run build", "npm run build"]
+cmds = [
+  "npm run build",
+  "cd client && npm run build && cd .."
+]
 
 [start]
-cmd = "npm run start:production"
+cmd = "node dist/server.js"
+
+[variables]
+NODE_ENV = "production"
