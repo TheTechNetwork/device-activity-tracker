@@ -47,14 +47,20 @@ cd client && npm install && cd ..
 ### Production Deployment
 
 **Deploy to Railway (Recommended):**
-See [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for detailed deployment instructions.
 
-Quick deploy:
+**🚀 Automated Deployment (GitHub Actions):**
+See [.github/SETUP_GUIDE.md](.github/SETUP_GUIDE.md) for step-by-step setup.
 1. Fork this repository
-2. Go to [railway.app](https://railway.app)
-3. Create new project from your GitHub repo
-4. Add a volume for `/app/auth_info_baileys`
-5. Deploy! 🚀
+2. Create Railway project at [railway.app](https://railway.app)
+3. Add `RAILWAY_TOKEN` to GitHub Secrets
+4. Push to deploy automatically! ✨
+
+**🌐 Manual Deployment:**
+See [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) for detailed instructions.
+- Railway Dashboard (web-based)
+- Railway CLI (command-line)
+
+**Important:** Add a volume for `/app/auth_info_baileys` to persist WhatsApp sessions!
 
 ## Usage
 

@@ -6,11 +6,67 @@ This guide explains how to deploy the Device Activity Tracker to Railway.
 
 - Railway account (sign up at [railway.app](https://railway.app))
 - Git repository pushed to GitHub
-- Railway CLI (optional but recommended): `npm i -g @railway/cli`
+- Railway CLI (optional): `npm i -g @railway/cli`
 
-## Deployment Steps
+## Deployment Options
 
-### Option 1: Deploy via Railway Dashboard (Recommended)
+We offer **3 deployment methods** - choose what works best for you:
+1. **GitHub Actions** (Recommended) - Fully automated CI/CD
+2. **Railway Dashboard** - Web-based, one-click deployment
+3. **Railway CLI** - Command-line deployment
+
+---
+
+## Option 1: GitHub Actions (Automated CI/CD) ⭐ RECOMMENDED
+
+Automatically deploy on every push to your branch!
+
+### Setup Steps
+
+1. **Get your Railway Token**
+   ```bash
+   # Install Railway CLI
+   npm i -g @railway/cli
+
+   # Login to Railway
+   railway login
+
+   # Get your token
+   railway whoami --token
+   ```
+   Copy the token that's displayed.
+
+2. **Add Railway Token to GitHub Secrets**
+   - Go to your GitHub repository
+   - Click **Settings** → **Secrets and variables** → **Actions**
+   - Click **New repository secret**
+   - Name: `RAILWAY_TOKEN`
+   - Value: Paste your Railway token
+   - Click **Add secret**
+
+3. **Link Railway Project (First Time Only)**
+   ```bash
+   # In your local repo
+   railway login
+   railway init
+   railway link
+   ```
+
+4. **Push to Deploy**
+   ```bash
+   git push
+   ```
+   GitHub Actions will automatically deploy to Railway! ✨
+
+**What happens automatically:**
+- ✅ Every push triggers deployment
+- ✅ Builds backend and frontend
+- ✅ Deploys to Railway
+- ✅ Check status in GitHub Actions tab
+
+---
+
+## Option 2: Deploy via Railway Dashboard
 
 1. **Create a new project on Railway**
    - Go to [railway.app](https://railway.app)
@@ -36,7 +92,9 @@ This guide explains how to deploy the Device Activity Tracker to Railway.
    - Mount path: `/app/auth_info_baileys`
    - This ensures WhatsApp authentication persists across deployments
 
-### Option 2: Deploy via Railway CLI
+---
+
+## Option 3: Deploy via Railway CLI
 
 ```bash
 # Install Railway CLI
@@ -54,6 +112,8 @@ railway up
 # Add domain
 railway domain
 ```
+
+---
 
 ## Configuration
 
